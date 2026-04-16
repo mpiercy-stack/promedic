@@ -765,7 +765,17 @@ function removeVendorDb(name){
 
 // ── Renumber ──────────────────────────────────────────────────────
 function renumber(){
-  PARTS.forEach((p,i)=>{p.id=`PAUL-${String(i+1).padStart(5,'0')}`;});
+  // Base parts keep their original IDs — never renumber them
+  // Only assign IDs to user-added extra parts, continuing from base count
+  const baseCount = BASE_PARTS.length;
+  let extraIdx = 0;
+  PARTS.forEach(p=>{
+    const isBase = BASE_PARTS.find(b=>b._key===p._key);
+    if(!isBase){
+      p.id = `PAUL-${String(baseCount + extraIdx + 1).padStart(5,'0')}`;
+      extraIdx++;
+    }
+  });
   // Persist renumbered parts_extra back to DB
   DB.parts_extra=PARTS.filter(p=>!BASE_PARTS.find(b=>b._key===p._key));
 }
