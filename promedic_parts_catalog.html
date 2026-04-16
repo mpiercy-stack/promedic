@@ -766,7 +766,6 @@ function removeVendorDb(name){
 // ── Renumber ──────────────────────────────────────────────────────
 function renumber(){
   // Base parts keep their original IDs — never renumber them
-  // Only assign IDs to user-added extra parts, continuing from base count
   const baseCount = BASE_PARTS.length;
   let extraIdx = 0;
   PARTS.forEach(p=>{
@@ -776,7 +775,6 @@ function renumber(){
       extraIdx++;
     }
   });
-  // Persist renumbered parts_extra back to DB
   DB.parts_extra=PARTS.filter(p=>!BASE_PARTS.find(b=>b._key===p._key));
 }
 
@@ -838,7 +836,9 @@ async function cloudLoad(){
   }
   // SUCCESS — cloud data is authoritative
   DB=j.record||{};
-  if(!DB.photos)          DB.photos={};
+  // Photos are stored locally only (too large for JSONBin) — restore from localStorage
+  const savedPhotos=lsGet(LS_DB,null);
+  if(!DB.photos)          DB.photos=(savedPhotos&&savedPhotos.photos)||{};
   if(!DB.prices)          DB.prices={};
   if(!DB.skus)            DB.skus={};
   if(!DB.qty)             DB.qty={};
@@ -868,11 +868,13 @@ async function cloudSave(){
   if(!key||!bid){return;} // not configured yet
   setSyncStatus('syncing','Saving…');
   DB.last_updated=new Date().toISOString();
+  // Photos are base64 and can exceed JSONBin's 5MB limit — keep them local only
+  const {photos,...dbWithoutPhotos}=DB;
   try{
     const res=await fetch(`${JBIN}/b/${bid}`,{
       method:'PUT',
       headers:{'Content-Type':'application/json','X-Master-Key':key},
-      body:JSON.stringify(DB)
+      body:JSON.stringify(dbWithoutPhotos)
     });
     const j=await res.json();
     if(j.error){setSyncStatus('error','Save failed: '+j.error);return;}
