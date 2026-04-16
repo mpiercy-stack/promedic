@@ -647,7 +647,7 @@ body:not(.admin-mode) .sync-setup-btn{display:none!important;}
   </div>
 
   <footer>
-    <div class="footer-left">Promedic Ambulance Upfitters &bull; 712 Highway 82 W, Greenwood MS 38930</div>
+    <div class="footer-left">Promedic Ambulance Upfitters</div>
     <div class="footer-right">Vendor Directory — all data stored locally</div>
   </footer>
 </div>
@@ -725,40 +725,9 @@ body:not(.admin-mode) .sync-setup-btn{display:none!important;}
 <script>
 // ── DATA ────────────────────────────────────────────────────────────────────
 // The 27 base suppliers from promedic_parts_catalog
-const BASE_SUPPLIERS = [
-  "Amazon","Austin Hardware","Big Dog Adhesive","Cleanseal","CPI",
-  "Danhard Inc","EVS Ltd","Grimco","Intertek Industrial","Jones Electric",
-  "KimBall Midwest","Leflore Steel","Leonard Metal","LGS Group","Liquid Springs",
-  "Lonseal","Mize & Company","Patrick Metals","Phoenix USA","Positron",
-  "SDG","Select Tech","Specialty Metals","Tecniq","Trimark","Uline","Whelen"
-];
+const BASE_SUPPLIERS = [];
 
-const BASE_WEBSITES = {
-  "Whelen":"https://www.whelen.com",
-  "Tecniq":"https://www.tecniqinc.com",
-  "CPI":"https://www.cpiequip.com",
-  "Austin Hardware":"https://www.austinhardware.com",
-  "Uline":"https://www.uline.com",
-  "Intertek Industrial":"https://www.intertekindustrial.com",
-  "Phoenix USA":"https://www.phoenixusa.net",
-  "LGS Group":"https://www.lgsgroupinc.com",
-  "Lonseal":"https://www.lonseal.com",
-  "Select Tech":"https://www.selecttechambulances.com",
-  "Danhard Inc":"https://www.danhard.com",
-  "SDG":"https://www.sdg-hvac.com",
-  "Positron":"https://www.positronems.com",
-  "Trimark":"https://www.trimarkrv.com",
-  "KimBall Midwest":"https://www.kimballmidwest.com",
-  "Liquid Springs":"https://www.liquidsprings.com",
-  "Grimco":"https://www.grimco.com",
-  "Mize & Company":"https://www.mizeandcompany.com",
-  "Big Dog Adhesive":"https://www.bigdogadhesive.com",
-  "Cleanseal":"https://www.cleanseal.com",
-  "EVS Ltd":"https://www.evsltd.com",
-  "Patrick Metals":"https://www.patrickmetals.com",
-  "Jones Electric":"https://www.joneselectricsupply.com",
-  "Amazon":"https://www.amazon.com"
-};
+const BASE_WEBSITES = {};
 
 // ── STORAGE ─────────────────────────────────────────────────────────────────
 
@@ -960,7 +929,7 @@ function getPartCount(supplier){
       }
     }catch{}
     // Base parts list - just supplier totals
-    const BASE_COUNTS={"Austin Hardware":8,"Big Dog Adhesive":2,"Cleanseal":3,"CPI":9,"Danhard Inc":11,"EVS Ltd":2,"Grimco":8,"Intertek Industrial":7,"KimBall Midwest":9,"LGS Group":3,"Liquid Springs":2,"Lonseal":1,"Patrick Metals":1,"Phoenix USA":1,"Positron":17,"SDG":4,"Select Tech":9,"Tecniq":4,"Trimark":8,"Whelen":47,"Leonard Metal":1,"Leflore Steel":3,"Specialty Metals":1,"Jones Electric":1,"Amazon":1,"Mize & Company":24,"Uline":2};
+    const BASE_COUNTS={};
     Object.entries(BASE_COUNTS).forEach(([k,v])=>{_partCounts[k]=(_partCounts[k]||0)+v;});
   }
   return _partCounts[supplier]||0;
