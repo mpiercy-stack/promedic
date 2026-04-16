@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promedic — Vendor Directory</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1a2744;--blue:#1d4ed8;--sky:#3b82f6;--red:#C8102E;
+  --light:#f0f4ff;--border:#dde3f0;--text:#1e293b;--muted:#64748b;--white:#ffffff;
+  --sh:0 4px 20px rgba(26,39,68,.12);--shh:0 12px 40px rgba(26,39,68,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:#0f172a;color:var(--text);min-height:100vh;}
+
+/* BG */
+.bg-wrap{position:fixed;inset:0;z-index:0;}
+.bg-grad{position:absolute;inset:0;background:linear-gradient(135deg,#0f172a 0%,#1a2744 45%,#0f2040 100%);}
+.bg-accent{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(29,78,216,.15) 0%,transparent 70%);top:-100px;right:-100px;}
+.bg-accent2{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(200,16,46,.08) 0%,transparent 70%);bottom:-50px;left:-50px;}
+.bg-line{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--red),var(--blue),transparent);}
+
+/* LAYOUT */
+.page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
+
+/* HEADER */
+header{padding:22px 48px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.logo-wrap{display:flex;align-items:center;}
+.logo-wrap img{height:48px;display:block;}
+.header-right{display:flex;align-items:center;gap:14px;}
+.back-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;color:#94a3b8;text-decoration:none;font-size:12px;font-weight:600;letter-spacing:.5px;transition:all .2s;}
+.back-btn:hover{background:rgba(255,255,255,.14);color:#e2e8f0;}
+.page-title-wrap{display:flex;flex-direction:column;}
+.page-sub{font-size:10px;font-weight:700;color:var(--red);letter-spacing:3px;text-transform:uppercase;}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:#fff;letter-spacing:-0.5px;}
+
+/* CONTROLS */
+.controls{padding:24px 48px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.search-box{flex:1;min-width:200px;max-width:380px;position:relative;}
+.search-box input{width:100%;padding:9px 14px 9px 36px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;color:#e2e8f0;font-size:13px;font-family:'Barlow',sans-serif;outline:none;transition:border-color .2s;}
+.search-box input::placeholder{color:#64748b;}
+.search-box input:focus{border-color:rgba(59,130,246,.5);}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#64748b;font-size:14px;}
+.stats-bar{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap;}
+.stat-pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:5px 14px;font-size:11px;color:#94a3b8;white-space:nowrap;}
+.stat-pill span{color:#e2e8f0;font-weight:700;}
+.add-vendor-btn{padding:9px 16px;background:linear-gradient(135deg,rgba(29,78,216,.5),rgba(59,130,246,.4));border:1px solid rgba(59,130,246,.4);border-radius:8px;color:#93c5fd;font-size:12px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .2s;}
+.add-vendor-btn:hover{background:linear-gradient(135deg,rgba(29,78,216,.7),rgba(59,130,246,.6));color:#fff;}
+
+/* GRID */
+.vendor-grid{padding:28px 48px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px;}
+.vendor-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;transition:all .25s;position:relative;}
+.vendor-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.18);box-shadow:0 16px 40px rgba(0,0,0,.35);}
+.vendor-card.unsaved{border-color:rgba(251,191,36,.3);}
+.vc-header{background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07);padding:16px 18px;display:flex;align-items:center;gap:14px;}
+.vc-logo{width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#94a3b8;overflow:hidden;flex-shrink:0;}
+.vc-logo img{width:100%;height:100%;object-fit:contain;padding:4px;}
+.vc-name-wrap{flex:1;min-width:0;}
+.vc-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vc-parts{font-size:10px;color:#64748b;letter-spacing:.5px;margin-top:2px;}
+.vc-web{font-size:11px;color:#60a5fa;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px;}
+.vc-web:hover{color:#93c5fd;}
+.vc-body{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.vc-field{display:flex;flex-direction:column;gap:3px;}
+.vc-field.full{grid-column:1/-1;}
+.vc-label{font-size:9px;font-weight:700;color:#475569;letter-spacing:1.5px;text-transform:uppercase;}
+.vc-value{font-size:12px;color:#cbd5e1;}
+.vc-value a{color:#60a5fa;text-decoration:none;}
+.vc-value a:hover{color:#93c5fd;text-decoration:underline;}
+.vc-value.empty{color:#334155;font-style:italic;}
+.vc-actions{padding:10px 18px 14px;display:flex;gap:8px;justify-content:flex-end;}
+.vc-btn{padding:6px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid;}
+.vc-btn.edit{background:rgba(29,78,216,.2);border-color:rgba(59,130,246,.3);color:#93c5fd;}
+.vc-btn.edit:hover{background:rgba(29,78,216,.4);color:#fff;}
+.vc-btn.del{background:rgba(200,16,46,.15);border-color:rgba(200,16,46,.3);color:#fca5a5;}
+.vc-btn.del:hover{background:rgba(200,16,46,.3);color:#fff;}
+
+/* EMPTY STATE */
+.empty-state{grid-column:1/-1;text-align:center;padding:80px 20px;color:#475569;}
+.empty-state .ei{font-size:48px;margin-bottom:12px;}
+.empty-state p{font-size:14px;}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-ov.open{opacity:1;pointer-events:all;}
+.modal{background:#1e293b;border:1px solid rgba(255,255,255,.13);border-radius:16px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;}
+.modal-hdr{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);}
+.modal-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:#e2e8f0;}
+.modal-close{background:transparent;border:none;color:#64748b;font-size:20px;cursor:pointer;padding:4px;line-height:1;}
+.modal-close:hover{color:#e2e8f0;}
+.modal-body{padding:20px 24px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.form-row.full{grid-template-columns:1fr;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group label{font-size:10px;font-weight:700;color:#64748b;letter-spacing:1px;text-transform:uppercase;}
+.form-group input,.form-group textarea{padding:9px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#e2e8f0;font-size:13px;font-family:'Barlow',sans-serif;outline:none;resize:vertical;}
+.form-group input:focus,.form-group textarea:focus{border-color:rgba(59,130,246,.5);}
+.form-group input::placeholder,.form-group textarea::placeholder{color:#475569;}
+.modal-foot{padding:16px 24px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:flex-end;gap:10px;}
+.btn-cancel{padding:9px 18px;background:transparent;border:1px solid rgba(255,255,255,.13);border-radius:8px;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-cancel:hover{border-color:rgba(255,255,255,.25);color:#94a3b8;}
+.btn-save{padding:9px 20px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.btn-save:hover{opacity:.85;}
+
+/* CONFIRM DIALOG */
+.confirm-ov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.confirm-ov.open{opacity:1;pointer-events:all;}
+.confirm-box{background:#1e293b;border:1px solid rgba(200,16,46,.3);border-radius:14px;padding:28px;max-width:400px;width:100%;text-align:center;}
+.confirm-box h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:#f87171;margin-bottom:10px;}
+.confirm-box p{font-size:13px;color:#94a3b8;margin-bottom:22px;}
+.confirm-btns{display:flex;gap:10px;justify-content:center;}
+.btn-confirm-del{padding:10px 22px;background:#C8102E;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-confirm-del:hover{background:#a50d25;}
+
+/* UNSAVED BADGE */
+.unsaved-badge{position:absolute;top:10px;right:10px;background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.4);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;color:#fbbf24;letter-spacing:.5px;}
+
+/* FOOTER */
+footer{padding:20px 48px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.05);margin-top:auto;}
+.footer-left,.footer-right{font-size:11px;color:#334155;}
+
+@media(max-width:640px){
+  header{padding:18px 16px 0;}
+  .controls{padding:18px 16px 0;}
+  .vendor-grid{padding:20px 16px 40px;}
+  footer{padding:16px;flex-direction:column;gap:6px;text-align:center;}
+  .vc-body{grid-template-columns:1fr;}
+  .vc-field.full{grid-column:1;}
+  .stats-bar{margin-left:0;}
+}
+</style>
+<!-- ═══ PROMEDIC ADMIN LOCK ═══ -->
+<script>
+(function(){
+  const HASH_KEY='pmc_admin_hash';
+  const DEFAULT_HASH='8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
+  let adminOn=false;
+
+  async function h(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+
+  function setAdmin(on){
+    adminOn=on;
+    sessionStorage.setItem('pmc_adm',on?'1':'');
+    document.body.classList.toggle('is-admin',on);
+    const fab=document.getElementById('_adm_fab');
+    if(fab){fab.textContent=on?'🔓 Admin':'🔒';fab.style.background=on?'rgba(22,163,74,.85)':'rgba(15,23,42,.9)';}
+  }
+
+  function buildUI(){
+    // FAB
+    const fab=document.createElement('button');
+    fab.id='_adm_fab';
+    fab.style.cssText='position:fixed;bottom:20px;right:20px;z-index:9999;height:44px;padding:0 16px;border-radius:22px;background:rgba(15,23,42,.9);border:1.5px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.5);backdrop-filter:blur(10px);transition:all .2s;';
+    fab.textContent='🔒';
+    fab.onclick=showPanel;
+    document.body.appendChild(fab);
+
+    // Modal
+    document.body.insertAdjacentHTML('beforeend',`
+<div id="_adm_ov" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:10000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#1e293b;border:1px solid rgba(255,255,255,.15);border-radius:16px;width:100%;max-width:380px;overflow:hidden;">
+    <div style="padding:18px 22px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);">
+      <span id="_adm_ttl" style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:#e2e8f0;">Admin Login</span>
+      <button onclick="document.getElementById('_adm_ov').style.display='none'" style="background:none;border:none;color:#64748b;font-size:20px;cursor:pointer;line-height:1;">✕</button>
+    </div>
+    <div id="_adm_body" style="padding:20px 22px;">
+      <div id="_adm_login">
+        <input type="password" id="_adm_pwd" placeholder="Password" style="display:block;width:100%;padding:10px 13px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;color:#e2e8f0;font-size:14px;font-family:'Barlow',sans-serif;outline:none;box-sizing:border-box;" onkeydown="if(event.key==='Enter')_admDoLogin()">
+        <div id="_adm_err" style="display:none;color:#f87171;font-size:12px;margin-top:6px;">Wrong password</div>
+        <button onclick="_admDoLogin()" style="margin-top:12px;width:100%;padding:10px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Login</button>
+        <p style="text-align:center;margin-top:10px;font-size:11px;color:#475569;">Default password: <strong style="color:#94a3b8;">admin</strong></p>
+      </div>
+      <div id="_adm_panel" style="display:none;">
+        <p style="color:#4ade80;font-size:13px;margin-bottom:16px;">✅ Logged in as admin</p>
+        <button onclick="setAdmin(false);document.getElementById('_adm_ov').style.display='none';" style="width:100%;padding:10px;background:rgba(200,16,46,.7);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px;">🔒 Lock &amp; Log Out</button>
+        <hr style="border-color:rgba(255,255,255,.1);margin:14px 0;">
+        <p style="font-size:11px;color:#64748b;margin-bottom:8px;">Change password:</p>
+        <input type="password" id="_adm_oldpwd" placeholder="Current password" style="display:block;width:100%;padding:9px 12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;color:#e2e8f0;font-size:13px;font-family:'Barlow',sans-serif;outline:none;box-sizing:border-box;margin-bottom:8px;">
+        <input type="password" id="_adm_newpwd" placeholder="New password" style="display:block;width:100%;padding:9px 12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;color:#e2e8f0;font-size:13px;font-family:'Barlow',sans-serif;outline:none;box-sizing:border-box;margin-bottom:8px;">
+        <button onclick="_admChangePwd()" style="width:100%;padding:9px;background:rgba(29,78,216,.6);border:1px solid rgba(59,130,246,.4);border-radius:8px;color:#93c5fd;font-size:12px;font-weight:600;cursor:pointer;">Update Password</button>
+      </div>
+    </div>
+  </div>
+</div>`);
+
+    // Restore session
+    if(sessionStorage.getItem('pmc_adm')==='1') setAdmin(true);
+  }
+
+  function showPanel(){
+    const ov=document.getElementById('_adm_ov');
+    ov.style.display='flex';
+    if(adminOn){
+      document.getElementById('_adm_ttl').textContent='Admin Settings';
+      document.getElementById('_adm_login').style.display='none';
+      document.getElementById('_adm_panel').style.display='block';
+    } else {
+      document.getElementById('_adm_ttl').textContent='Admin Login';
+      document.getElementById('_adm_login').style.display='block';
+      document.getElementById('_adm_panel').style.display='none';
+      document.getElementById('_adm_err').style.display='none';
+      document.getElementById('_adm_pwd').value='';
+      setTimeout(()=>document.getElementById('_adm_pwd').focus(),80);
+    }
+  }
+
+  window._admDoLogin=async function(){
+    const pwd=document.getElementById('_adm_pwd').value;
+    const stored=localStorage.getItem(HASH_KEY)||DEFAULT_HASH;
+    if(await h(pwd)===stored){
+      setAdmin(true);
+      document.getElementById('_adm_ov').style.display='none';
+    } else {
+      document.getElementById('_adm_err').style.display='block';
+    }
+  };
+
+  window._admChangePwd=async function(){
+    const old=document.getElementById('_adm_oldpwd').value;
+    const nw=document.getElementById('_adm_newpwd').value;
+    const stored=localStorage.getItem(HASH_KEY)||DEFAULT_HASH;
+    if(await h(old)!==stored){alert('Current password is wrong.');return;}
+    if(!nw){alert('New password cannot be empty.');return;}
+    localStorage.setItem(HASH_KEY,await h(nw));
+    alert('✅ Password updated!');
+    document.getElementById('_adm_oldpwd').value='';
+    document.getElementById('_adm_newpwd').value='';
+  };
+
+  document.addEventListener('DOMContentLoaded',buildUI);
+})();
+</script>
+<style>
+/* ── Admin lock: hide all edit controls unless admin ── */
+body:not(.is-admin) .hbtn { display:none !important; }
+body:not(.is-admin) .edit-toggle { display:none !important; }
+body:not(.is-admin) .sync-setup-btn { display:none !important; }
+body:not(.is-admin) [data-admin] { display:none !important; }
+body:not(.is-admin) .vc-btn.edit { display:none !important; }
+body:not(.is-admin) .vc-btn.del { display:none !important; }
+body:not(.is-admin) .add-vendor-btn { display:none !important; }
+</style>
+<!-- ═══ END ADMIN LOCK ═══ -->
+
+</head>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promedic — Vendor Directory</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1a2744;--blue:#1d4ed8;--sky:#3b82f6;--red:#C8102E;
+  --light:#f0f4ff;--border:#dde3f0;--text:#1e293b;--muted:#64748b;--white:#ffffff;
+  --sh:0 4px 20px rgba(26,39,68,.12);--shh:0 12px 40px rgba(26,39,68,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:#0f172a;color:var(--text);min-height:100vh;}
+
+/* BG */
+.bg-wrap{position:fixed;inset:0;z-index:0;}
+.bg-grad{position:absolute;inset:0;background:linear-gradient(135deg,#0f172a 0%,#1a2744 45%,#0f2040 100%);}
+.bg-accent{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(29,78,216,.15) 0%,transparent 70%);top:-100px;right:-100px;}
+.bg-accent2{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(200,16,46,.08) 0%,transparent 70%);bottom:-50px;left:-50px;}
+.bg-line{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--red),var(--blue),transparent);}
+
+/* LAYOUT */
+.page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
+
+/* HEADER */
+header{padding:22px 48px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.logo-wrap{display:flex;align-items:center;}
+.logo-wrap img{height:48px;display:block;}
+.header-right{display:flex;align-items:center;gap:14px;}
+.back-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;color:#94a3b8;text-decoration:none;font-size:12px;font-weight:600;letter-spacing:.5px;transition:all .2s;}
+.back-btn:hover{background:rgba(255,255,255,.14);color:#e2e8f0;}
+.page-title-wrap{display:flex;flex-direction:column;}
+.page-sub{font-size:10px;font-weight:700;color:var(--red);letter-spacing:3px;text-transform:uppercase;}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:#fff;letter-spacing:-0.5px;}
+
+/* CONTROLS */
+.controls{padding:24px 48px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.search-box{flex:1;min-width:200px;max-width:380px;position:relative;}
+.search-box input{width:100%;padding:9px 14px 9px 36px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;color:#e2e8f0;font-size:13px;font-family:'Barlow',sans-serif;outline:none;transition:border-color .2s;}
+.search-box input::placeholder{color:#64748b;}
+.search-box input:focus{border-color:rgba(59,130,246,.5);}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#64748b;font-size:14px;}
+.stats-bar{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap;}
+.stat-pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:5px 14px;font-size:11px;color:#94a3b8;white-space:nowrap;}
+.stat-pill span{color:#e2e8f0;font-weight:700;}
+.add-vendor-btn{padding:9px 16px;background:linear-gradient(135deg,rgba(29,78,216,.5),rgba(59,130,246,.4));border:1px solid rgba(59,130,246,.4);border-radius:8px;color:#93c5fd;font-size:12px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .2s;}
+.add-vendor-btn:hover{background:linear-gradient(135deg,rgba(29,78,216,.7),rgba(59,130,246,.6));color:#fff;}
+
+/* GRID */
+.vendor-grid{padding:28px 48px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px;}
+.vendor-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;transition:all .25s;position:relative;}
+.vendor-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.18);box-shadow:0 16px 40px rgba(0,0,0,.35);}
+.vendor-card.unsaved{border-color:rgba(251,191,36,.3);}
+.vc-header{background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07);padding:16px 18px;display:flex;align-items:center;gap:14px;}
+.vc-logo{width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#94a3b8;overflow:hidden;flex-shrink:0;}
+.vc-logo img{width:100%;height:100%;object-fit:contain;padding:4px;}
+.vc-name-wrap{flex:1;min-width:0;}
+.vc-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vc-parts{font-size:10px;color:#64748b;letter-spacing:.5px;margin-top:2px;}
+.vc-web{font-size:11px;color:#60a5fa;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px;}
+.vc-web:hover{color:#93c5fd;}
+.vc-body{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.vc-field{display:flex;flex-direction:column;gap:3px;}
+.vc-field.full{grid-column:1/-1;}
+.vc-label{font-size:9px;font-weight:700;color:#475569;letter-spacing:1.5px;text-transform:uppercase;}
+.vc-value{font-size:12px;color:#cbd5e1;}
+.vc-value a{color:#60a5fa;text-decoration:none;}
+.vc-value a:hover{color:#93c5fd;text-decoration:underline;}
+.vc-value.empty{color:#334155;font-style:italic;}
+.vc-actions{padding:10px 18px 14px;display:flex;gap:8px;justify-content:flex-end;}
+.vc-btn{padding:6px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid;}
+.vc-btn.edit{background:rgba(29,78,216,.2);border-color:rgba(59,130,246,.3);color:#93c5fd;}
+.vc-btn.edit:hover{background:rgba(29,78,216,.4);color:#fff;}
+.vc-btn.del{background:rgba(200,16,46,.15);border-color:rgba(200,16,46,.3);color:#fca5a5;}
+.vc-btn.del:hover{background:rgba(200,16,46,.3);color:#fff;}
+
+/* EMPTY STATE */
+.empty-state{grid-column:1/-1;text-align:center;padding:80px 20px;color:#475569;}
+.empty-state .ei{font-size:48px;margin-bottom:12px;}
+.empty-state p{font-size:14px;}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-ov.open{opacity:1;pointer-events:all;}
+.modal{background:#1e293b;border:1px solid rgba(255,255,255,.13);border-radius:16px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;}
+.modal-hdr{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);}
+.modal-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:#e2e8f0;}
+.modal-close{background:transparent;border:none;color:#64748b;font-size:20px;cursor:pointer;padding:4px;line-height:1;}
+.modal-close:hover{color:#e2e8f0;}
+.modal-body{padding:20px 24px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.form-row.full{grid-template-columns:1fr;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group label{font-size:10px;font-weight:700;color:#64748b;letter-spacing:1px;text-transform:uppercase;}
+.form-group input,.form-group textarea{padding:9px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#e2e8f0;font-size:13px;font-family:'Barlow',sans-serif;outline:none;resize:vertical;}
+.form-group input:focus,.form-group textarea:focus{border-color:rgba(59,130,246,.5);}
+.form-group input::placeholder,.form-group textarea::placeholder{color:#475569;}
+.modal-foot{padding:16px 24px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:flex-end;gap:10px;}
+.btn-cancel{padding:9px 18px;background:transparent;border:1px solid rgba(255,255,255,.13);border-radius:8px;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-cancel:hover{border-color:rgba(255,255,255,.25);color:#94a3b8;}
+.btn-save{padding:9px 20px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.btn-save:hover{opacity:.85;}
+
+/* CONFIRM DIALOG */
+.confirm-ov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.confirm-ov.open{opacity:1;pointer-events:all;}
+.confirm-box{background:#1e293b;border:1px solid rgba(200,16,46,.3);border-radius:14px;padding:28px;max-width:400px;width:100%;text-align:center;}
+.confirm-box h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:#f87171;margin-bottom:10px;}
+.confirm-box p{font-size:13px;color:#94a3b8;margin-bottom:22px;}
+.confirm-btns{display:flex;gap:10px;justify-content:center;}
+.btn-confirm-del{padding:10px 22px;background:#C8102E;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-confirm-del:hover{background:#a50d25;}
+
+/* UNSAVED BADGE */
+.unsaved-badge{position:absolute;top:10px;right:10px;background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.4);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;color:#fbbf24;letter-spacing:.5px;}
+
+/* FOOTER */
+footer{padding:20px 48px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.05);margin-top:auto;}
+.footer-left,.footer-right{font-size:11px;color:#334155;}
+
+@media(max-width:640px){
+  header{padding:18px 16px 0;}
+  .controls{padding:18px 16px 0;}
+  .vendor-grid{padding:20px 16px 40px;}
+  footer{padding:16px;flex-direction:column;gap:6px;text-align:center;}
+  .vc-body{grid-template-columns:1fr;}
+  .vc-field.full{grid-column:1;}
+  .stats-bar{margin-left:0;}
+}
+</style>
+<!-- ═══ PROMEDIC FIREBASE + ADMIN LOCK ═══ -->
+<script>
+// Utility
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d;}catch{return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+
+// ── Admin Auth ────────────────────────────────────────────────
+const ADMIN_HASH_KEY='pmc_admin_hash';
+const ADMIN_DEFAULT='8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // 'admin'
+let _isAdmin=false;
+
+async function sha256(s){
+  const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+async function checkAdmin(pwd){return await sha256(pwd)===(lsGet(ADMIN_HASH_KEY,ADMIN_DEFAULT));}
+async function changeAdminPassword(oldPwd,newPwd){
+  if(!await checkAdmin(oldPwd)){alert('Current password wrong.');return;}
+  lsSet(ADMIN_HASH_KEY,await sha256(newPwd));
+  alert('Password changed!');
+}
+function setAdminMode(on){
+  _isAdmin=on; lsSet('pmc_admin_session',on);
+  document.body.classList.toggle('admin-mode',on);
+  const btn=document.getElementById('pmc-lock-btn');
+  if(btn){btn.textContent=on?'🔓 Admin':'🔒';btn.title=on?'Click to lock':'Admin login';}
+}
+function isAdmin(){return _isAdmin;}
+
+// ── Firebase ──────────────────────────────────────────────────
+let _fbApp=null,_fbDb=null,_fbRef=null,_fbSet=null,_fbGet=null;
+async function fbInit(){
+  const cfg=lsGet('pmc_firebase_cfg',{});
+  if(!cfg.databaseURL)return false;
+  try{
+    const {initializeApp,getApps,getApp}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const {getDatabase,ref,set,get}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+    _fbApp=getApps().length?getApp():initializeApp(cfg);
+    _fbDb=getDatabase(_fbApp); _fbRef=ref; _fbSet=set; _fbGet=get;
+    return true;
+  }catch(e){console.error('FB init:',e);return false;}
+}
+async function fbLoad(path){
+  if(!_fbDb)return null;
+  try{const s=await _fbGet(_fbRef(_fbDb,path));return s.exists()?s.val():null;}
+  catch(e){return null;}
+}
+async function fbSave(path,data){
+  if(!_fbDb)return false;
+  try{await _fbSet(_fbRef(_fbDb,path),data);return true;}
+  catch(e){return false;}
+}
+
+// ── Setup modals injected on DOMContentLoaded ─────────────────
+function buildAdminUI(){
+  // FAB button
+  const fab=document.createElement('button');
+  fab.id='pmc-lock-btn'; fab.className='pmc-lock-fab';
+  fab.textContent='🔒'; fab.title='Admin login';
+  fab.onclick=showAdminModal;
+  document.body.appendChild(fab);
+
+  // Admin login modal
+  document.body.insertAdjacentHTML('beforeend',`
+  <div id="pmc-admin-ov" class="pmc-ov">
+    <div class="pmc-card">
+      <div class="pmc-card-hdr"><h2 id="pmc-admin-ttl">Admin Login</h2>
+        <button onclick="document.getElementById('pmc-admin-ov').classList.remove('open')" class="pmc-x">✕</button></div>
+      <div class="pmc-card-body">
+        <div id="pmc-admin-logged-in" style="display:none">
+          <p style="color:#4ade80;font-size:13px;margin-bottom:14px">✅ You are logged in as admin</p>
+          <button class="pmc-btn-red" onclick="setAdminMode(false);document.getElementById('pmc-admin-ov').classList.remove('open')">🔒 Lock / Log Out</button>
+          <hr style="border-color:rgba(255,255,255,.1);margin:14px 0">
+          <p style="font-size:11px;color:#64748b;margin-bottom:8px">Change admin password:</p>
+          <input type="password" id="pmc-old-pwd" placeholder="Current password" class="pmc-inp">
+          <input type="password" id="pmc-new-pwd" placeholder="New password" class="pmc-inp" style="margin-top:8px">
+          <button class="pmc-btn-blue" style="margin-top:8px" onclick="changeAdminPassword(document.getElementById('pmc-old-pwd').value,document.getElementById('pmc-new-pwd').value)">Update Password</button>
+          <hr style="border-color:rgba(255,255,255,.1);margin:14px 0">
+          <button class="pmc-btn-outline" onclick="document.getElementById('pmc-admin-ov').classList.remove('open');openFbModal()">⚙ Firebase Settings</button>
+        </div>
+        <div id="pmc-admin-login-form">
+          <input type="password" id="pmc-login-pwd" placeholder="Admin password" class="pmc-inp" onkeydown="if(event.key==='Enter')doLogin()">
+          <div id="pmc-login-err" style="color:#f87171;font-size:12px;display:none;margin-top:6px">Incorrect password</div>
+          <button class="pmc-btn-blue" style="margin-top:12px;width:100%" onclick="doLogin()">Login</button>
+          <p style="font-size:11px;color:#475569;margin-top:10px;text-align:center">Default password is: admin</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="pmc-fb-ov" class="pmc-ov">
+    <div class="pmc-card">
+      <div class="pmc-card-hdr"><h2>Firebase Setup</h2>
+        <button onclick="document.getElementById('pmc-fb-ov').classList.remove('open')" class="pmc-x">✕</button></div>
+      <div class="pmc-card-body">
+        <p style="font-size:12px;color:#94a3b8;margin-bottom:14px">Enter your Firebase Realtime Database credentials. All 4 pages share this config.</p>
+        <label class="pmc-lbl">API Key</label>
+        <input id="pmc-fb-key" type="text" placeholder="AIzaSy..." class="pmc-inp">
+        <label class="pmc-lbl" style="margin-top:10px">Auth Domain</label>
+        <input id="pmc-fb-auth" type="text" placeholder="yourproject.firebaseapp.com" class="pmc-inp">
+        <label class="pmc-lbl" style="margin-top:10px">Database URL</label>
+        <input id="pmc-fb-url" type="text" placeholder="https://yourproject-default-rtdb.firebaseio.com" class="pmc-inp">
+        <label class="pmc-lbl" style="margin-top:10px">Project ID</label>
+        <input id="pmc-fb-pid" type="text" placeholder="your-project-id" class="pmc-inp">
+      </div>
+      <div class="pmc-card-foot">
+        <button class="pmc-btn-cancel" onclick="document.getElementById('pmc-fb-ov').classList.remove('open')">Cancel</button>
+        <button class="pmc-btn-blue" onclick="saveFbCfg()">Save & Reconnect</button>
+      </div>
+    </div>
+  </div>`);
+
+  // Restore session
+  if(lsGet('pmc_admin_session',false)) setAdminMode(true);
+}
+
+async function doLogin(){
+  const pwd=document.getElementById('pmc-login-pwd').value;
+  if(await checkAdmin(pwd)){
+    setAdminMode(true);
+    document.getElementById('pmc-admin-ov').classList.remove('open');
+  } else {
+    document.getElementById('pmc-login-err').style.display='block';
+  }
+}
+
+function showAdminModal(){
+  const ov=document.getElementById('pmc-admin-ov');
+  document.getElementById('pmc-admin-logged-in').style.display=_isAdmin?'block':'none';
+  document.getElementById('pmc-admin-login-form').style.display=_isAdmin?'none':'block';
+  document.getElementById('pmc-login-err').style.display='none';
+  ov.classList.add('open');
+  if(!_isAdmin) setTimeout(()=>document.getElementById('pmc-login-pwd').focus(),100);
+}
+
+function openFbModal(){
+  const cfg=lsGet('pmc_firebase_cfg',{});
+  document.getElementById('pmc-fb-key').value=cfg.apiKey||'';
+  document.getElementById('pmc-fb-auth').value=cfg.authDomain||'';
+  document.getElementById('pmc-fb-url').value=cfg.databaseURL||'';
+  document.getElementById('pmc-fb-pid').value=cfg.projectId||'';
+  document.getElementById('pmc-fb-ov').classList.add('open');
+}
+
+function saveFbCfg(){
+  const pid=document.getElementById('pmc-fb-pid').value.trim();
+  const cfg={
+    apiKey:document.getElementById('pmc-fb-key').value.trim(),
+    authDomain:document.getElementById('pmc-fb-auth').value.trim(),
+    databaseURL:document.getElementById('pmc-fb-url').value.trim(),
+    projectId:pid,
+    storageBucket:pid+'.firebasestorage.app',
+    appId:'placeholder'
+  };
+  if(!cfg.databaseURL){alert('Database URL is required');return;}
+  lsSet('pmc_firebase_cfg',cfg);
+  document.getElementById('pmc-fb-ov').classList.remove('open');
+  alert('Firebase config saved! Reloading...');
+  location.reload();
+}
+
+document.addEventListener('DOMContentLoaded', buildAdminUI);
+</script>
+<style>
+/* ── Shared Admin/Firebase UI ── */
+.pmc-lock-fab{position:fixed;bottom:22px;right:22px;z-index:9999;min-width:48px;height:48px;border-radius:24px;padding:0 14px;background:rgba(15,23,42,.9);border:1.5px solid rgba(255,255,255,.2);color:#fff;font-size:18px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:all .2s;backdrop-filter:blur(10px);}
+.pmc-lock-fab:hover{background:rgba(29,78,216,.85);transform:scale(1.05);}
+body.admin-mode .pmc-lock-fab{background:rgba(22,163,74,.85);font-size:13px;font-weight:700;}
+.pmc-ov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.pmc-ov.open{opacity:1;pointer-events:all;}
+.pmc-card{background:#1e293b;border:1px solid rgba(255,255,255,.12);border-radius:16px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;}
+.pmc-card-hdr{padding:18px 22px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);}
+.pmc-card-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:#e2e8f0;}
+.pmc-x{background:none;border:none;color:#64748b;font-size:18px;cursor:pointer;padding:2px 6px;}
+.pmc-x:hover{color:#e2e8f0;}
+.pmc-card-body{padding:18px 22px;}
+.pmc-card-foot{padding:14px 22px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:flex-end;gap:10px;}
+.pmc-inp{display:block;width:100%;padding:9px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#e2e8f0;font-size:13px;font-family:'Barlow',sans-serif;outline:none;box-sizing:border-box;}
+.pmc-inp:focus{border-color:rgba(59,130,246,.5);}
+.pmc-lbl{display:block;font-size:10px;font-weight:700;color:#64748b;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.pmc-btn-blue{padding:9px 18px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;}
+.pmc-btn-red{padding:9px 18px;background:rgba(200,16,46,.8);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;}
+.pmc-btn-outline{padding:9px 18px;background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#94a3b8;font-size:12px;font-weight:600;cursor:pointer;}
+.pmc-btn-cancel{padding:8px 16px;background:transparent;border:1px solid rgba(255,255,255,.13);border-radius:8px;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;}
+/* Hide edit controls for non-admins */
+body:not(.admin-mode) .admin-only{display:none!important;}
+body:not(.admin-mode) .hbtn{display:none!important;}
+body:not(.admin-mode) .edit-toggle{display:none!important;}
+body:not(.admin-mode) .sync-setup-btn{display:none!important;}
+</style>
+
+
+</head>
+<body>
+<div class="bg-wrap">
+  <div class="bg-grad"></div>
+  <div class="bg-accent"></div>
+  <div class="bg-accent2"></div>
+  <div class="bg-line"></div>
+</div>
+
+<div class="page">
+  <header>
+    <div class="logo-wrap">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA/4AAAEXCAYAAAAUSJ+uAAEAAElEQVR42uxdd3wUVfd+zp3dkNB7BxEVVPS1Ye++2LEgCGJBRZoU4RUVERFEFBFRUUABAREFBMSCir18iAqCir8UKQSQIAQCGJIQSEjI3p3dne37++PuTHZ3Zm9mdze7yS6ev0Ioduaee+65z3nOnUKYGY444ogjjjjiiCOOOOKII4444ogjFVOEkwaOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOIAf0ccccQRRxxxxBFHHHHEEUccccQB/o444ogjjjjiiCOOOOKII4444ogjjjjiiCOOOOKII4444ogjjjjiiCOOKIIwB+ABBl2Tfd" alt="Promedic" style="height:48px;background:transparent;">
+    </div>
+    <div class="header-right">
+      <div class="page-title-wrap">
+        <div class="page-sub">Reference</div>
+        <div class="page-title">Vendor Directory</div>
+      </div>
+      <a href="promedic_home.html" class="back-btn">← Home</a>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search vendors…" oninput="renderVendors()">
+    </div>
+    <div class="stats-bar">
+      <div class="stat-pill">Vendors: <span id="statVendors">—</span></div>
+      <div class="stat-pill">With Contact: <span id="statContact">—</span></div>
+      <div class="stat-pill">With Account #: <span id="statAcct">—</span></div>
+    </div>
+    <button class="add-vendor-btn admin-only" onclick="openAddModal()">＋ Add Vendor</button>
+  </div>
+
+  <div class="vendor-grid" id="vendorGrid">
+    <div class="empty-state"><div class="ei">📦</div><p>Loading vendors…</p></div>
+  </div>
+
+  <footer>
+    <div class="footer-left">Promedic Ambulance Upfitters &bull; 712 Highway 82 W, Greenwood MS 38930</div>
+    <div class="footer-right">Vendor Directory — all data stored locally</div>
+  </footer>
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="modal-ov" id="vendorModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2 id="modalTitle">Add Vendor</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row full">
+        <div class="form-group">
+          <label>Vendor Name *</label>
+          <input id="mv-name" type="text" placeholder="e.g. Whelen Engineering">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Phone</label>
+          <input id="mv-phone" type="tel" placeholder="(800) 555-0100">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input id="mv-email" type="email" placeholder="orders@vendor.com">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Contact Name</label>
+          <input id="mv-contact" type="text" placeholder="Sales rep name">
+        </div>
+        <div class="form-group">
+          <label>Account #</label>
+          <input id="mv-acct" type="text" placeholder="Promedic account #">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>Billing Address</label>
+          <textarea id="mv-billing" rows="2" placeholder="123 Supplier St, City, ST 00000"></textarea>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Website</label>
+          <input id="mv-website" type="url" placeholder="https://www.vendor.com">
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input id="mv-notes" type="text" placeholder="Payment terms, lead time…">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveVendor()">Save Vendor</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete -->
+<div class="confirm-ov" id="confirmOv">
+  <div class="confirm-box">
+    <h3>Remove Vendor?</h3>
+    <p id="confirmMsg">This will remove the vendor contact info. Parts data in the catalog is not affected.</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm-del" onclick="executeDelete()">Remove</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────
+// The 27 base suppliers from promedic_parts_catalog
+const BASE_SUPPLIERS = [
+  "Amazon","Austin Hardware","Big Dog Adhesive","Cleanseal","CPI",
+  "Danhard Inc","EVS Ltd","Grimco","Intertek Industrial","Jones Electric",
+  "KimBall Midwest","Leflore Steel","Leonard Metal","LGS Group","Liquid Springs",
+  "Lonseal","Mize & Company","Patrick Metals","Phoenix USA","Positron",
+  "SDG","Select Tech","Specialty Metals","Tecniq","Trimark","Uline","Whelen"
+];
+
+const BASE_WEBSITES = {
+  "Whelen":"https://www.whelen.com",
+  "Tecniq":"https://www.tecniqinc.com",
+  "CPI":"https://www.cpiequip.com",
+  "Austin Hardware":"https://www.austinhardware.com",
+  "Uline":"https://www.uline.com",
+  "Intertek Industrial":"https://www.intertekindustrial.com",
+  "Phoenix USA":"https://www.phoenixusa.net",
+  "LGS Group":"https://www.lgsgroupinc.com",
+  "Lonseal":"https://www.lonseal.com",
+  "Select Tech":"https://www.selecttechambulances.com",
+  "Danhard Inc":"https://www.danhard.com",
+  "SDG":"https://www.sdg-hvac.com",
+  "Positron":"https://www.positronems.com",
+  "Trimark":"https://www.trimarkrv.com",
+  "KimBall Midwest":"https://www.kimballmidwest.com",
+  "Liquid Springs":"https://www.liquidsprings.com",
+  "Grimco":"https://www.grimco.com",
+  "Mize & Company":"https://www.mizeandcompany.com",
+  "Big Dog Adhesive":"https://www.bigdogadhesive.com",
+  "Cleanseal":"https://www.cleanseal.com",
+  "EVS Ltd":"https://www.evsltd.com",
+  "Patrick Metals":"https://www.patrickmetals.com",
+  "Jones Electric":"https://www.joneselectricsupply.com",
+  "Amazon":"https://www.amazon.com"
+};
+
+// ── STORAGE ─────────────────────────────────────────────────────────────────
+
+
+// vendor_contacts = { "Vendor Name": { phone, email, contact, acct, billing, notes, website } }
+function getContacts(){return lsGet('pmc_vendor_contacts',{});}
+function saveContacts(c){ lsSet('pmc_vendor_contacts',c); }
+
+
+
+// Also read extra vendors added in parts catalog
+function getCatalogExtraVendors(){
+  try{
+    const db=lsGet('promedic_db',null)||lsGet('pmc_db',null);
+    if(db&&db.vendors&&Array.isArray(db.vendors))return db.vendors;
+  }catch{}
+  return [];
+}
+
+function getAllVendors(){
+  const extra=getCatalogExtraVendors();
+  const all=[...new Set([...BASE_SUPPLIERS,...extra])];
+  return all.sort((a,b)=>a.localeCompare(b));
+}
+
+// ── MODAL STATE ──────────────────────────────────────────────────────────────
+let editingVendor=null;
+let pendingDelete=null;
+
+function openAddModal(){
+  editingVendor=null;
+  document.getElementById('modalTitle').textContent='Add Vendor';
+  ['mv-name','mv-phone','mv-email','mv-contact','mv-acct','mv-billing','mv-website','mv-notes']
+    .forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mv-name').disabled=false;
+  document.getElementById('vendorModal').classList.add('open');
+}
+
+function openEditModal(name){
+  editingVendor=name;
+  const contacts=getContacts();
+  const info=contacts[name]||{};
+  document.getElementById('modalTitle').textContent='Edit Vendor';
+  document.getElementById('mv-name').value=name;
+  document.getElementById('mv-name').disabled=true;
+  document.getElementById('mv-phone').value=info.phone||'';
+  document.getElementById('mv-email').value=info.email||'';
+  document.getElementById('mv-contact').value=info.contact||'';
+  document.getElementById('mv-acct').value=info.acct||'';
+  document.getElementById('mv-billing').value=info.billing||'';
+  document.getElementById('mv-website').value=info.website||BASE_WEBSITES[name]||'';
+  document.getElementById('mv-notes').value=info.notes||'';
+  document.getElementById('vendorModal').classList.add('open');
+}
+
+function closeModal(){document.getElementById('vendorModal').classList.remove('open');}
+
+function saveVendor(){
+  const name=document.getElementById('mv-name').value.trim();
+  if(!name){alert('Please enter a vendor name.');return;}
+  const contacts=getContacts();
+  contacts[name]={
+    phone:document.getElementById('mv-phone').value.trim(),
+    email:document.getElementById('mv-email').value.trim(),
+    contact:document.getElementById('mv-contact').value.trim(),
+    acct:document.getElementById('mv-acct').value.trim(),
+    billing:document.getElementById('mv-billing').value.trim(),
+    website:document.getElementById('mv-website').value.trim(),
+    notes:document.getElementById('mv-notes').value.trim(),
+  };
+  saveContacts(contacts);
+  closeModal();
+  renderVendors();
+}
+
+// ── DELETE ───────────────────────────────────────────────────────────────────
+function confirmDelete(name){
+  pendingDelete=name;
+  document.getElementById('confirmMsg').textContent=`Contact info for "${name}" will be removed. Parts data in the catalog is NOT affected.`;
+  document.getElementById('confirmOv').classList.add('open');
+}
+function closeConfirm(){document.getElementById('confirmOv').classList.remove('open');pendingDelete=null;}
+function executeDelete(){
+  if(!pendingDelete)return;
+  const contacts=getContacts();
+  delete contacts[pendingDelete];
+  saveContacts(contacts);
+  closeConfirm();
+  renderVendors();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderVendors(){
+  const vendors=getAllVendors();
+  const contacts=getContacts();
+  const q=(document.getElementById('searchInput').value||'').toLowerCase().trim();
+
+  const filtered=vendors.filter(v=>{
+    if(!q)return true;
+    const info=contacts[v]||{};
+    return v.toLowerCase().includes(q)||
+      (info.phone&&info.phone.includes(q))||
+      (info.email&&info.email.toLowerCase().includes(q))||
+      (info.contact&&info.contact.toLowerCase().includes(q))||
+      (info.acct&&info.acct.toLowerCase().includes(q))||
+      (info.billing&&info.billing.toLowerCase().includes(q));
+  });
+
+  // Stats
+  const withContact=vendors.filter(v=>{const i=contacts[v];return i&&(i.phone||i.email||i.contact);}).length;
+  const withAcct=vendors.filter(v=>{const i=contacts[v];return i&&i.acct;}).length;
+  document.getElementById('statVendors').textContent=vendors.length;
+  document.getElementById('statContact').textContent=withContact;
+  document.getElementById('statAcct').textContent=withAcct;
+
+  if(filtered.length===0){
+    document.getElementById('vendorGrid').innerHTML=
+      '<div class="empty-state"><div class="ei">🔍</div><p>No vendors match your search.</p></div>';
+    return;
+  }
+
+  document.getElementById('vendorGrid').innerHTML=filtered.map(name=>{
+    const info=contacts[name]||{};
+    const hasData=info.phone||info.email||info.contact||info.acct||info.billing;
+    const website=info.website||BASE_WEBSITES[name]||'';
+    const domain=website?website.replace(/^https?:\/\/(www\.)?/,'').split('/')[0]:'';
+    const logoSrc=`https://logo.clearbit.com/${domain}`;
+    const initials=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+
+    const phoneHtml=info.phone
+      ? `<a href="tel:${info.phone.replace(/\D/g,'')}">${escHtml(info.phone)}</a>`
+      : `<span class="empty">—</span>`;
+    const emailHtml=info.email
+      ? `<a href="mailto:${escHtml(info.email)}">${escHtml(info.email)}</a>`
+      : `<span class="empty">—</span>`;
+    const billingHtml=info.billing
+      ? escHtml(info.billing).replace(/\n/g,'<br>')
+      : `<span class="empty">—</span>`;
+
+    return `<div class="vendor-card${hasData?'':' unsaved'}">
+      ${!hasData?'<div class="unsaved-badge">No details</div>':''}
+      <div class="vc-header">
+        <div class="vc-logo" id="logo-${safeId(name)}">
+          ${domain?`<img src="${logoSrc}" alt="${escHtml(name)}" onerror="this.parentElement.textContent='${escHtml(initials)}'">`:escHtml(initials)}
+        </div>
+        <div class="vc-name-wrap">
+          <div class="vc-name">${escHtml(name)}</div>
+          <div class="vc-parts">${getPartCount(name)} part${getPartCount(name)!==1?'s':''} in catalog</div>
+          ${website?`<a class="vc-web" href="${escHtml(website)}" target="_blank" rel="noopener">🌐 ${escHtml(domain)}</a>`:''}
+        </div>
+      </div>
+      <div class="vc-body">
+        <div class="vc-field">
+          <div class="vc-label">Phone</div>
+          <div class="vc-value">${phoneHtml}</div>
+        </div>
+        <div class="vc-field">
+          <div class="vc-label">Email</div>
+          <div class="vc-value">${emailHtml}</div>
+        </div>
+        <div class="vc-field">
+          <div class="vc-label">Contact</div>
+          <div class="vc-value${!info.contact?' empty':''}">${info.contact?escHtml(info.contact):'—'}</div>
+        </div>
+        <div class="vc-field">
+          <div class="vc-label">Account #</div>
+          <div class="vc-value${!info.acct?' empty':''}">${info.acct?escHtml(info.acct):'—'}</div>
+        </div>
+        <div class="vc-field full">
+          <div class="vc-label">Billing Address</div>
+          <div class="vc-value${!info.billing?' empty':''}">${billingHtml}</div>
+        </div>
+        ${info.notes?`<div class="vc-field full"><div class="vc-label">Notes</div><div class="vc-value">${escHtml(info.notes)}</div></div>`:''}
+      </div>
+      <div class="vc-actions">
+        <button class="vc-btn edit admin-only" onclick="openEditModal('${escAttr(name)}')">✏️ Edit</button>
+        ${hasData?`<button class="vc-btn del admin-only" onclick="confirmDelete('${escAttr(name)}')">🗑 Clear</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escAttr(s){return String(s).replace(/'/g,"\\'");}
+function safeId(s){return s.replace(/[^a-zA-Z0-9]/g,'_');}
+
+// Count parts from BASE_PARTS constant (mirrored here for count purposes)
+// We pull it from localStorage if available (shared with catalog)
+let _partCounts=null;
+function getPartCount(supplier){
+  if(!_partCounts){
+    _partCounts={};
+    // Try to read from catalogDB
+    try{
+      const db=lsGet('promedic_db',null)||lsGet('pmc_db',null);
+      if(db&&db.parts_extra){
+        db.parts_extra.forEach(p=>{if(p.supplier)_partCounts[p.supplier]=(_partCounts[p.supplier]||0)+1;});
+      }
+    }catch{}
+    // Base parts list - just supplier totals
+    const BASE_COUNTS={"Austin Hardware":8,"Big Dog Adhesive":2,"Cleanseal":3,"CPI":9,"Danhard Inc":11,"EVS Ltd":2,"Grimco":8,"Intertek Industrial":7,"KimBall Midwest":9,"LGS Group":3,"Liquid Springs":2,"Lonseal":1,"Patrick Metals":1,"Phoenix USA":1,"Positron":17,"SDG":4,"Select Tech":9,"Tecniq":4,"Trimark":8,"Whelen":47,"Leonard Metal":1,"Leflore Steel":3,"Specialty Metals":1,"Jones Electric":1,"Amazon":1,"Mize & Company":24,"Uline":2};
+    Object.entries(BASE_COUNTS).forEach(([k,v])=>{_partCounts[k]=(_partCounts[k]||0)+v;});
+  }
+  return _partCounts[supplier]||0;
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal();closeConfirm();}
+});
+renderVendors();
+</script>
+</body>
+</html>
