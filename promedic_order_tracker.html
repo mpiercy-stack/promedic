@@ -993,37 +993,72 @@ function closeOrderModal(){document.getElementById('orderOv').classList.remove('
 function addItemRow(item={}){
   const il=document.getElementById('itemsList');
   const row=document.createElement('div');
-  row.style.cssText='display:grid;grid-template-columns:1fr 2fr 60px;gap:6px;align-items:center;';
+  // Layout: Part selector (full row), then SKU | Desc | Cost | Qty | Remove
+  row.style.cssText='display:flex;flex-direction:column;gap:5px;background:var(--light);border:1.5px solid var(--border);border-radius:9px;padding:9px 10px;';
   row.innerHTML=`
-    <select style="padding:6px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:'Barlow',sans-serif;font-size:11px;background:var(--light);outline:none;" class="item-part">
-      <option value="">— Part —</option>
-      ${getParts().map(p=>`<option value="${p._key}" data-desc="${p.desc.replace(/"/g,'&quot;')}" data-sku="${p.sku||''}" data-supplier="${p.supplier}" ${item._key===p._key?'selected':''}>${p.id||''} — ${p.desc.substring(0,35)}${p.desc.length>35?'…':''}</option>`).join('')}
+    <select style="width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:'Barlow',sans-serif;font-size:11px;background:#fff;outline:none;color:var(--text);" class="item-part">
+      <option value="">— Select Part (auto-fills fields below) —</option>
+      ${getParts().map(p=>`<option value="${p._key}" data-desc="${p.desc.replace(/"/g,'&quot;')}" data-sku="${(p.sku||'').replace(/"/g,'&quot;')}" data-cost="${p.cost||''}" data-supplier="${p.supplier}" ${item._key===p._key?'selected':''}>${p.id||''} — ${p.desc.substring(0,40)}${p.desc.length>40?'…':''}</option>`).join('')}
     </select>
-    <input type="text" placeholder="Description / note" class="item-desc" value="${item.desc||''}" style="padding:6px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:'Barlow',sans-serif;font-size:11px;background:var(--light);outline:none;">
-    <input type="number" placeholder="Qty" class="item-qty" value="${item.qty||1}" min="1" style="padding:6px 6px;border:1.5px solid var(--border);border-radius:7px;font-family:'Barlow',sans-serif;font-size:11px;background:var(--light);outline:none;text-align:center;">
-    <button type="button" onclick="this.parentElement.remove()" style="height:28px;width:28px;background:#fee2e2;border:none;border-radius:6px;cursor:pointer;color:var(--red);font-size:14px;">✕</button>`;
-  // Wire part selector to auto-fill desc
+    <div style="display:grid;grid-template-columns:110px 1fr 90px 60px 28px;gap:5px;align-items:center;">
+      <input type="text" placeholder="SKU override" class="item-sku" value="${item.sku||''}" style="padding:5px 7px;border:1.5px solid var(--border);border-radius:6px;font-family:'Barlow',sans-serif;font-size:11px;background:#fff;outline:none;color:var(--text);">
+      <input type="text" placeholder="Description / note" class="item-desc" value="${item.desc||''}" style="padding:5px 7px;border:1.5px solid var(--border);border-radius:6px;font-family:'Barlow',sans-serif;font-size:11px;background:#fff;outline:none;color:var(--text);">
+      <input type="number" placeholder="Cost $" class="item-cost" value="${item.cost!=null&&item.cost!==''?item.cost:''}" min="0" step="0.01" style="padding:5px 6px;border:1.5px solid var(--border);border-radius:6px;font-family:'Barlow',sans-serif;font-size:11px;background:#fff;outline:none;text-align:right;color:var(--text);">
+      <input type="number" placeholder="Qty" class="item-qty" value="${item.qty||1}" min="1" style="padding:5px 4px;border:1.5px solid var(--border);border-radius:6px;font-family:'Barlow',sans-serif;font-size:11px;background:#fff;outline:none;text-align:center;color:var(--text);">
+      <button type="button" onclick="this.closest('div').parentElement.remove()" style="height:28px;width:28px;background:#fee2e2;border:none;border-radius:6px;cursor:pointer;color:var(--red);font-size:14px;flex-shrink:0;">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:110px 1fr 90px 60px 28px;gap:5px;">
+      <span style="font-size:9px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding-left:2px;">SKU Override</span>
+      <span style="font-size:9px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding-left:2px;">Description</span>
+      <span style="font-size:9px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding-left:2px;text-align:right;">Unit Cost</span>
+      <span style="font-size:9px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding-left:2px;text-align:center;">Qty</span>
+      <span></span>
+    </div>`;
+  // Wire part selector to auto-fill fields
   const partSel=row.querySelector('.item-part');
   const descInp=row.querySelector('.item-desc');
+  const skuInp =row.querySelector('.item-sku');
+  const costInp=row.querySelector('.item-cost');
   partSel.addEventListener('change',()=>{
     const opt=partSel.options[partSel.selectedIndex];
-    if(opt.value&&!descInp.value) descInp.value=opt.dataset.desc||'';
-    // Auto-set supplier
-    if(opt.dataset.supplier)document.getElementById('ord-supplier').value=opt.dataset.supplier;
+    if(opt.value){
+      if(!descInp.value) descInp.value=opt.dataset.desc||'';
+      if(!skuInp.value)  skuInp.value=opt.dataset.sku||'';
+      if(!costInp.value && opt.dataset.cost) costInp.value=opt.dataset.cost;
+      if(opt.dataset.supplier)document.getElementById('ord-supplier').value=opt.dataset.supplier;
+    }
   });
   if(item._key)partSel.value=item._key;
+  // Auto-recalc total on cost/qty change
+  [costInp, row.querySelector('.item-qty')].forEach(inp=>inp.addEventListener('input', recalcTotal));
   il.appendChild(row);
+}
+
+function recalcTotal(){
+  const rows=[...document.querySelectorAll('#itemsList > div')];
+  let sum=0;
+  rows.forEach(row=>{
+    const cost=parseFloat(row.querySelector('.item-cost')?.value)||0;
+    const qty =parseInt(row.querySelector('.item-qty')?.value)||1;
+    sum+=cost*qty;
+  });
+  if(sum>0) document.getElementById('ord-total').value=sum.toFixed(2);
 }
 
 function gatherItems(){
   return [...document.querySelectorAll('#itemsList > div')].map(row=>{
     const partSel=row.querySelector('.item-part');
     const opt=partSel?.options[partSel.selectedIndex];
+    const skuVal=(row.querySelector('.item-sku')?.value||'').trim()||opt?.dataset.sku||'';
+    const descVal=(row.querySelector('.item-desc')?.value||'').trim()||opt?.dataset.desc||'';
+    const costVal=parseFloat(row.querySelector('.item-cost')?.value)||0;
+    const qtyVal=parseInt(row.querySelector('.item-qty')?.value)||1;
     return{
       _key:partSel?.value||'',
-      sku:opt?.dataset.sku||'',
-      desc:row.querySelector('.item-desc')?.value||opt?.dataset.desc||'',
-      qty:parseInt(row.querySelector('.item-qty')?.value)||1,
+      sku:skuVal,
+      desc:descVal,
+      cost:costVal,
+      qty:qtyVal,
     };
   }).filter(i=>i.desc||i._key);
 }
@@ -1098,7 +1133,17 @@ function openDetail(id){
        <div class="step-label">${s.label}</div>
      </div>`
   ).join('')}</div>`;
-  const items=(o.items||[]).map(i=>`<tr><td>${i.sku||'—'}</td><td>${i.desc||'—'}</td><td style="text-align:center;font-weight:700">${i.qty}</td></tr>`).join('');
+  const fmtCost=v=>v>0?'$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+  const items=(o.items||[]).map(i=>{
+    const lineTotal=(parseFloat(i.cost)||0)*(parseInt(i.qty)||1);
+    return `<tr>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);">${i.sku||'—'}</td>
+      <td>${i.desc||'—'}</td>
+      <td style="text-align:right;color:var(--muted);">${fmtCost(parseFloat(i.cost)||0)}</td>
+      <td style="text-align:center;font-weight:700">${i.qty}</td>
+      <td style="text-align:right;font-weight:700;color:var(--blue);">${lineTotal>0?fmtCost(lineTotal):'—'}</td>
+    </tr>`;
+  }).join('');
   document.getElementById('detailBody').innerHTML=`
     ${stepperHtml}
     <div class="detail-panel" style="margin-top:4px">
@@ -1118,7 +1163,7 @@ function openDetail(id){
     </div>
     ${o.items?.length?`
     <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-top:4px">Parts / Items</div>
-    <table class="items-tbl"><thead><tr><th>SKU</th><th>Description</th><th style="text-align:center">Qty</th></tr></thead>
+    <table class="items-tbl"><thead><tr><th>SKU</th><th>Description</th><th style="text-align:right">Unit Cost</th><th style="text-align:center">Qty</th><th style="text-align:right">Line Total</th></tr></thead>
     <tbody>${items}</tbody></table>`:''}</div>`;
   // Show/hide advance button
   const adv=document.getElementById('advanceBtn');
