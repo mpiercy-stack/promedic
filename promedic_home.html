@@ -179,10 +179,49 @@ footer{padding:24px 48px;display:flex;align-items:center;justify-content:space-b
     }
   }
 
+  // ── JSONBin password sync ────────────────────────────────────
+  const JBIN='https://api.jsonbin.io/v3';
+  function getKey(){return localStorage.getItem('pmc_apikey');}
+  function getBin(){return localStorage.getItem('pmc_binid');}
+
+  async function getStoredHash(){
+    // Try JSONBin first, fall back to localStorage
+    const key=getKey(), bin=getBin();
+    if(key&&bin){
+      try{
+        const r=await fetch(`${JBIN}/b/${bin}/latest`,{headers:{'X-Master-Key':key}});
+        const j=await r.json();
+        if(j.record&&j.record._admin_hash) return j.record._admin_hash;
+      }catch(e){}
+    }
+    return localStorage.getItem(HASH_KEY)||DEFAULT_HASH;
+  }
+
+  async function saveHashToCloud(hash){
+    const key=getKey(), bin=getBin();
+    localStorage.setItem(HASH_KEY, hash);
+    if(!key||!bin) return;
+    try{
+      // Read current bin, update just the _admin_hash field
+      const r=await fetch(`${JBIN}/b/${bin}/latest`,{headers:{'X-Master-Key':key}});
+      const j=await r.json();
+      const record=j.record||{};
+      record._admin_hash=hash;
+      await fetch(`${JBIN}/b/${bin}`,{
+        method:'PUT',
+        headers:{'Content-Type':'application/json','X-Master-Key':key},
+        body:JSON.stringify(record)
+      });
+    }catch(e){console.warn('Could not sync password to cloud:',e);}
+  }
+
   window._admDoLogin=async function(){
     const pwd=document.getElementById('_adm_pwd').value;
-    const stored=localStorage.getItem(HASH_KEY)||DEFAULT_HASH;
-    if(await h(pwd)===stored){
+    const stored=await getStoredHash();
+    const hashed=await h(pwd);
+    if(hashed===stored){
+      // Also cache locally so offline login works
+      localStorage.setItem(HASH_KEY, stored);
       setAdmin(true);
       document.getElementById('_adm_ov').style.display='none';
     } else {
@@ -193,11 +232,12 @@ footer{padding:24px 48px;display:flex;align-items:center;justify-content:space-b
   window._admChangePwd=async function(){
     const old=document.getElementById('_adm_oldpwd').value;
     const nw=document.getElementById('_adm_newpwd').value;
-    const stored=localStorage.getItem(HASH_KEY)||DEFAULT_HASH;
+    const stored=await getStoredHash();
     if(await h(old)!==stored){alert('Current password is wrong.');return;}
     if(!nw){alert('New password cannot be empty.');return;}
-    localStorage.setItem(HASH_KEY,await h(nw));
-    alert('✅ Password updated!');
+    const newHash=await h(nw);
+    await saveHashToCloud(newHash);
+    alert('✅ Password updated on all devices!');
     document.getElementById('_adm_oldpwd').value='';
     document.getElementById('_adm_newpwd').value='';
   };
