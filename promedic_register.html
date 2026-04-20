@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promedic &mdash; Register</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg-0:#0a0e17;--bg-1:#0f1420;--bg-2:#151c2c;--bg-3:#1c2438;
+  --border:#22304a;--border-bright:#2e4266;
+  --text:#dce3ef;--text-muted:#7a8699;--text-dim:#4a5468;
+  --accent:#38bdf8;--accent-dim:#0c4a6e;
+  --red:#ef4444;--amber:#f59e0b;--green:#22c55e;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--bg-0);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none;}
+
+.topbar{background:var(--bg-1);border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;letter-spacing:.5px;color:#fff;}
+.brand-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.brand-text{display:flex;flex-direction:column;line-height:1;}
+.back-link{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;padding:8px 14px;border:1px solid var(--border);transition:all .15s;}
+.back-link:hover{color:var(--text);border-color:var(--border-bright);background:var(--bg-2);}
+
+.wrap{min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+.card{width:100%;max-width:480px;background:var(--bg-1);border:1px solid var(--border);padding:40px 36px;}
+.card-id{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:800;color:#fff;letter-spacing:1px;text-transform:uppercase;line-height:1;margin-bottom:8px;}
+.card-sub{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:32px;}
+
+.field{margin-bottom:16px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.field label{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;}
+.field input,.field select{
+  width:100%;padding:12px 14px;background:var(--bg-2);border:1px solid var(--border);
+  color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;
+  transition:border-color .15s;
+}
+.field input:focus,.field select:focus{border-color:var(--accent);}
+.field input::placeholder{color:var(--text-dim);}
+.field select option{background:var(--bg-2);}
+
+.password-hint{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--text-dim);letter-spacing:.5px;margin-top:6px;
+}
+
+.submit{
+  width:100%;padding:14px;margin-top:8px;
+  background:var(--accent);border:none;
+  color:var(--bg-0);font-family:'JetBrains Mono',monospace;font-size:12px;
+  letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:700;
+  transition:background .15s;
+}
+.submit:hover{background:#7dd3fc;}
+.submit:disabled{background:var(--bg-3);color:var(--text-muted);cursor:not-allowed;}
+
+.error-box{
+  margin-top:16px;padding:14px;
+  background:rgba(239,68,68,.08);
+  border-left:3px solid var(--red);
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--red);letter-spacing:.5px;line-height:1.5;
+  display:none;
+}
+.success-box{
+  margin-top:16px;padding:18px;
+  background:rgba(34,197,94,.08);
+  border-left:3px solid var(--green);
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--green);letter-spacing:.5px;line-height:1.7;
+  display:none;
+}
+
+.footer-link{text-align:center;margin-top:28px;font-size:13px;color:var(--text-muted);}
+.footer-link a{color:var(--accent);font-weight:500;}
+.footer-link a:hover{text-decoration:underline;}
+
+.terminal-foot{
+  margin-top:32px;padding-top:20px;border-top:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--text-dim);letter-spacing:1px;display:flex;justify-content:space-between;
+}
+
+.spinner{
+  display:inline-block;width:12px;height:12px;
+  border:2px solid var(--bg-0);border-top-color:transparent;
+  border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:8px;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="promedic_home.html" class="brand">
+    <div class="brand-text">
+      <div class="brand-name">PROMEDIC</div>
+      <div class="brand-sub">Ambulance Upfitters</div>
+    </div>
+  </a>
+  <a href="promedic_home.html" class="back-link">&larr; Back</a>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="card-id">AUTH / 002</div>
+    <div class="card-title">Register</div>
+    <div class="card-sub">Create a Promedic operations account.</div>
+
+    <div class="field-row">
+      <div class="field"><label>First name</label><input type="text" id="firstName" placeholder="Marcus" autocomplete="given-name"></div>
+      <div class="field"><label>Last name</label><input type="text" id="lastName" placeholder="Smith" autocomplete="family-name"></div>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="you@promedic.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Role</label>
+      <select id="role">
+        <option value="">Select role...</option>
+        <option value="Logistics">Logistics</option>
+        <option value="Operations">Operations</option>
+        <option value="Admin">Admin</option>
+        <option value="Procurement">Procurement</option>
+        <option value="Management">Management</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="new-password">
+      <div class="password-hint">// Minimum 8 characters</div>
+    </div>
+    <div class="field">
+      <label>Confirm password</label>
+      <input type="password" id="confirmPassword" placeholder="••••••••" autocomplete="new-password">
+    </div>
+
+    <button class="submit" id="registerBtn" onclick="handleRegister()">Create account</button>
+
+    <div class="error-box" id="errorBox"></div>
+    <div class="success-box" id="successBox"></div>
+
+    <div class="footer-link">
+      Already have an account? <a href="promedic_login.html">Log in</a>
+    </div>
+
+    <div class="terminal-foot">
+      <span>AUTH / SUPABASE</span>
+      <span>v2.1.0</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://xizxpxvtkhwowpfjfsdy.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpenhweHZ0a2h3b3dwZmpmc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NzI0MjgsImV4cCI6MjA5MjI0ODQyOH0.v-HDR2Urxxe2Cr4BjyQx578e_9NimH9dlSbJlQd2UW4';
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // If already logged in, redirect to home
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if (session) window.location.href = 'promedic_home.html';
+  });
+
+  const registerBtn = document.getElementById('registerBtn');
+  const errorBox = document.getElementById('errorBox');
+  const successBox = document.getElementById('successBox');
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.style.display = 'block';
+    successBox.style.display = 'none';
+  }
+
+  function showSuccess(msg) {
+    successBox.innerHTML = msg;
+    successBox.style.display = 'block';
+    errorBox.style.display = 'none';
+  }
+
+  function setLoading(loading) {
+    if (loading) {
+      registerBtn.disabled = true;
+      registerBtn.innerHTML = '<span class="spinner"></span>Creating account...';
+    } else {
+      registerBtn.disabled = false;
+      registerBtn.innerHTML = 'Create account';
+    }
+  }
+
+  async function handleRegister() {
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const role = document.getElementById('role').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    errorBox.style.display = 'none';
+    successBox.style.display = 'none';
+
+    // Validation
+    if (!firstName || !lastName) { showError('// First and last name are required.'); return; }
+    if (!email) { showError('// Email is required.'); return; }
+    if (!role) { showError('// Please select a role.'); return; }
+    if (!password) { showError('// Password is required.'); return; }
+    if (password.length < 8) { showError('// Password must be at least 8 characters.'); return; }
+    if (password !== confirmPassword) { showError('// Passwords do not match.'); return; }
+
+    setLoading(true);
+
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          full_name: `${firstName} ${lastName}`,
+          role: role,
+        }
+      }
+    });
+
+    if (error) {
+      setLoading(false);
+      if (error.message.includes('already registered')) {
+        showError('// An account with this email already exists. Try logging in.');
+      } else if (error.message.includes('Password should be')) {
+        showError('// Password is too weak. Use at least 8 characters with letters and numbers.');
+      } else {
+        showError('// ' + error.message);
+      }
+      return;
+    }
+
+    setLoading(false);
+
+    // Check if email confirmation is required
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+      showError('// An account with this email already exists. Try logging in.');
+      return;
+    }
+
+    if (data.session) {
+      // Email confirmation disabled — logged in immediately
+      showSuccess('// Account created successfully. Redirecting to Command Center...');
+      setTimeout(() => { window.location.href = 'promedic_home.html'; }, 1200);
+    } else {
+      // Email confirmation required
+      showSuccess(
+        `// Account created for ${firstName} ${lastName}.<br>` +
+        `// A confirmation email has been sent to ${email}.<br>` +
+        `// Please check your inbox and confirm before logging in.`
+      );
+      registerBtn.style.display = 'none';
+    }
+  }
+</script>
+
+</body>
+</html>
